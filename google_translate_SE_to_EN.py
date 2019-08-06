@@ -52,9 +52,9 @@ TaskErrorType={
     }
 
 def getListOfAttachments(inc):
-    #
+    
     l=list()
-    #sys_id, file_name
+    
 
     inc_url=HOST+'/api/now/table/sys_attachment?sysparm_query=table_sys_id%3D'+inc
    
@@ -69,10 +69,10 @@ def getListOfAttachments(inc):
         d.update({'file_name':element.get('file_name','')})
         l.append(d)
 
-    print(l)
+    
 
     return l
-#download one attachment to the drive
+
 
 def checkTmpFolder():
     lista = os.listdir()
@@ -132,19 +132,17 @@ def getAttachments(lista1):
 def postAttachments(task,lista_plikow):
     goToTmp()
     
-    #lista_plikow = os.listdir()
+    
 
-    print(lista_plikow)
+    
 
     for element in lista_plikow:
         file_name, file_extension = os.path.splitext(element)
 
-        print('element=',element)
-        print(file_name)
-        print(file_extension)
+       
         u_ext = extension.get(file_extension,'')
 
-        print(u_ext)
+        
 
         if u_ext:
 
@@ -158,9 +156,9 @@ def postAttachments(task,lista_plikow):
             
             headers = {"Accept":"*/*"}
 
-            print(url)
+            
             response = requests.post(url, auth=(USR,PWD), headers=headers, files=files , data=payload)
-            print('tu')
+            
 
             # Check for HTTP codes other than 201
             if response.status_code != 201:
@@ -272,7 +270,7 @@ def returnToCS(sys_id, where,message):
 
     work_notes=message
 
-    print('return to CS in')
+    
 
     
     dane = json.dumps({"assignment_group":where,"state":"2","work_notes":work_notes})
