@@ -44,6 +44,9 @@ extension={
         '.eml':'application/email',
         '.msg':'application/email',
         '.pdf':'application/pdf',
+        '.PDF':'application/pdf',
+        '.htm':'text/html',
+        '.html':'text/html',
         }
 TaskErrorType={
     '1':'1 - Critical – Other',
@@ -111,7 +114,7 @@ def getAttachments(lista1):
     
      
     checkTmpFolder()
-    cleanTmp()
+    #cleanTmp()
     goToTmp()
 
     for element in lista1:
@@ -262,6 +265,13 @@ def returnAsAwaiting3rdParty(sys_id, weherReturn):
     if response.status_code != 200: 
         return 'ERROR'
 
+def workInProgress(sys_id):
+
+    url=HOST+'/api/now/table/incident/'+sys_id
+    headers = {"Content-Type":"application/json","Accept":"application/json"}
+    d=json.dumps({"assign_to":conf.SA_RPA_roger,"state":"-6"})
+    response = requests.put(url, auth=(USR,PWD), headers=headers ,data=d)
+
 
 def createDescription(t1,t2):
     delimiter = '--'*20
@@ -279,7 +289,7 @@ def createTask(number,sys_id,EXELA_QUEUE,title,task_description,impact,urgency,p
     if not u_error_type:
         u_error_type='4 - Low - Other'
 
-    d = json.dumps({"assignment_group":EXELA_QUEUE, "u_incident": sys_id, "short_description": title, "description":task_description, "impact": impact, "urgency": urgency, "u_error_type":u_error_type})
+    d = json.dumps({"assignment_group":EXELA_QUEUE, "u_incident": sys_id, "short_description": title, "description":task_description, "impact": impact, "urgency": urgency, "u_error_type":u_error_type,"company":"c41c391edb4cd74004877868bf96198b"})
 
     response = requests.post(url, auth=(USR,PWD), headers=headers,data=d)
 
@@ -306,7 +316,7 @@ def main():
         urgency = element.get('urgency','')
         prio = element.get('priority','')
         
-
+        workInProgress(sys_id)
         if log.exists(number):
             returnToCS(sys_id,CS_SE_QUEUE,"Hi,this ticket was processed before, please check.")
             continue
@@ -340,5 +350,5 @@ def main():
 if __name__=='__main__':
     while True:
         main()
-        sleep(300)
+        sleep(30)
         
