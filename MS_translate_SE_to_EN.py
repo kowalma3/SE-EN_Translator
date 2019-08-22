@@ -31,6 +31,7 @@ extension={
         '.jpeg':'image/jpg',
         '.tiff':'image/tif',
         '.tif':'image/tif',
+        '.Tif':'image/tif',
         '.txt':'text/plain',
         '.xml':'text/xml',
         '.doc':'application/msword',
@@ -64,7 +65,8 @@ def getListOfAttachments(inc):
    
     headers = {"Content-Type":"application/json","Accept":"application/json"}
     response = requests.get(inc_url, auth=(USR, PWD), headers=headers )
-    
+
+    sleep(30)
     lista=response.json()['result']
 
     for element in lista:
@@ -112,7 +114,7 @@ def cleanTmp():
     
 def getAttachments(lista1):
     
-     
+    print(lista1) 
     checkTmpFolder()
     #cleanTmp()
     goToTmp()
@@ -128,6 +130,7 @@ def getAttachments(lista1):
                 handle.write(chunk)
         handle.close()
 
+    sleep(100)
     exitTmp()
 
         
@@ -143,8 +146,8 @@ def postAttachments(task,lista_plikow):
     for element in lista_plikow:
         file_name, file_extension = os.path.splitext(element)
 
-       
-        u_ext = extension.get(file_extension,'')
+        fe = file_extension.lower()
+        u_ext = extension.get(fe,'')
 
         
 
@@ -189,6 +192,7 @@ def copyAttachments(inc,task):
             lista.append(element.get('file_name'))
         
         postAttachments(task,lista)
+        sleep(20)
 
 
 def MS_translate(text):
@@ -275,11 +279,11 @@ def workInProgress(sys_id):
 
 def createDescription(t1,t2):
     delimiter = '--'*20
-    text = t1+'\n'+delimiter+'\n'+t2
+    text = t1+'\n'+ delimiter+'\n'+t2
 
     return text
 
-def createTask(number,sys_id,EXELA_QUEUE,title,task_description,impact,urgency,prio):
+def createTask(number,sys_id,EXELA_QUEUE,title,task_description,impact,urgency,prio,company):
 
     url = HOST + '/api/now/table/u_incident_task'
     headers = {"Content_Type":"application/json","Accept":"application/json"}
@@ -289,7 +293,7 @@ def createTask(number,sys_id,EXELA_QUEUE,title,task_description,impact,urgency,p
     if not u_error_type:
         u_error_type='4 - Low - Other'
 
-    d = json.dumps({"assignment_group":EXELA_QUEUE, "u_incident": sys_id, "short_description": title, "description":task_description, "impact": impact, "urgency": urgency, "u_error_type":u_error_type,"company":"c41c391edb4cd74004877868bf96198b"})
+    d = json.dumps({"assignment_group":EXELA_QUEUE, "u_incident": sys_id, "short_description": title, "description":task_description, "impact": impact, "urgency": urgency, "u_error_type":u_error_type,"company":company})
 
     response = requests.post(url, auth=(USR,PWD), headers=headers,data=d)
 
@@ -315,6 +319,8 @@ def main():
         impact = element.get('impact','')
         urgency = element.get('urgency','')
         prio = element.get('priority','')
+        company = element.get('company','').get('value','')##
+        print(number)
         
         workInProgress(sys_id)
         if log.exists(number):
@@ -337,7 +343,7 @@ def main():
             log.add_log(number+':translation ERROR')
     
         task_description = createDescription(translate_title,translate_description)
-        task_id=createTask(number,sys_id,EXELA_QUEUE,title,task_description,impact,urgency,prio)
+        task_id=createTask(number,sys_id,EXELA_QUEUE,title,task_description,impact,urgency,prio,company)
 
 
         
@@ -346,6 +352,7 @@ def main():
 
         
         log.add_log(number+':'+sys_id+':'+':processed')
+        sleep(10)
 
 if __name__=='__main__':
     while True:
